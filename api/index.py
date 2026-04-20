@@ -1,6 +1,8 @@
 import os
 import sys
 import base64
+import uuid as uuid_lib
+from datetime import datetime
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +19,8 @@ from agents.rag_agent import search_origin
 from utils.image_loader import load_image_as_base64, ImageLoadError, UnsupportedFormatError
 
 app = FastAPI(title="DeepGuard AI 판독기 API")
+
+_reports: dict[str, dict] = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -113,6 +117,13 @@ class SearchOriginRequest(BaseModel):
     model: str
 
 
+class ShareRequest(BaseModel):
+    result: dict
+    image_base64: str | None = None
+    mime_type: str = "image/jpeg"
+    image_url: str | None = None
+
+
 @app.post("/api/analyze-url")
 async def analyze_url(req: UrlRequest):
     """URL로 이미지 분석"""
@@ -147,3 +158,24 @@ async def search_origin_endpoint(req: SearchOriginRequest):
         raise HTTPException(status_code=500, detail=f"원본 탐색 중 오류가 발생했습니다: {str(e)}")
 
     return result
+
+
+@app.post("/api/share")
+def create_share(req: ShareRequest):
+    report_id = str(uuid_lib.uuid4())[:8]
+    _reports[report_id] = {
+        "result": req.result,
+        "image_base64": req.image_base64,
+        "mime_type": req.mime_type,
+        "image_url": req.image_url,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    return {"id": report_id}
+
+
+@app.get("/api/report/{report_id}")
+def get_report(report_id: str):
+    report = _reports.get(report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="리포트를 찾을 수 없습니다.")
+    return report

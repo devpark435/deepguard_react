@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import HomeScreen from './screens/HomeScreen';
 import AnalyzingScreen from './screens/AnalyzingScreen';
@@ -29,7 +29,49 @@ export default function App() {
   const [analyzeProgress, setAnalyzeProgress] = useState(0);
   const [analyzeStep, setAnalyzeStep] = useState(0);
   const [error, setError] = useState(null);
+  const [shareToast, setShareToast] = useState(false);
   const fileInputRef = useRef();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reportId = params.get('report');
+    if (!reportId) return;
+
+    fetch(`${API_BASE}/api/report/${reportId}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        setAnalysisResult(data.result);
+        setImagePreview(data.image_url || (data.image_base64 ? `data:${data.mime_type};base64,${data.image_base64}` : null));
+        setImageBase64(data.image_base64);
+        setImageMimeType(data.mime_type);
+        setImageUrl(data.image_url);
+        setScreen('result');
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleShare = async () => {
+    try {
+      const body = {
+        result: analysisResult,
+        image_base64: imageBase64,
+        mime_type: imageMimeType || 'image/jpeg',
+        image_url: imageUrl,
+      };
+      const res = await fetch(`${API_BASE}/api/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const { id } = await res.json();
+      const shareUrl = `${window.location.origin}/?report=${id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2000);
+    } catch {
+      // 조용히 무시
+    }
+  };
 
   const simulateProgress = async (apiCall) => {
     setScreen('analyzing');
@@ -156,15 +198,23 @@ export default function App() {
   );
 
   if (screen === 'result') return (
-    <ResultScreen
-      imagePreview={imagePreview}
-      imageBase64={imageBase64}
-      imageMimeType={imageMimeType}
-      imageUrl={imageUrl}
-      result={analysisResult}
-      ragEnabled={analysisResult?.score >= 70 && analysisResult?.isDeepfake === true}
-      onReset={reset}
-    />
+    <>
+      {shareToast && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: 'var(--surface)', border: '1px solid var(--success)', color: 'var(--success)', padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, zIndex: 9999, boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+          링크가 클립보드에 복사되었습니다!
+        </div>
+      )}
+      <ResultScreen
+        imagePreview={imagePreview}
+        imageBase64={imageBase64}
+        imageMimeType={imageMimeType}
+        imageUrl={imageUrl}
+        result={analysisResult}
+        ragEnabled={analysisResult?.score >= 70 && analysisResult?.isDeepfake === true}
+        onReset={reset}
+        onShare={handleShare}
+      />
+    </>
   );
 
   return null;

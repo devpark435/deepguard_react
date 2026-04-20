@@ -6,7 +6,7 @@ import ProgressBar from '../components/ProgressBar';
 
 const API_BASE = 'http://localhost:8000';
 
-export default function ResultScreen({ imagePreview, imageBase64, imageMimeType, imageUrl, result, ragEnabled, onReset }) {
+export default function ResultScreen({ imagePreview, imageBase64, imageMimeType, imageUrl, result, ragEnabled, onReset, onShare }) {
   const [activeTab, setActiveTab] = useState('clues');
   const [ragLoading, setRagLoading] = useState(false);
   const [ragResult, setRagResult] = useState(null);
@@ -62,13 +62,22 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
             Deep<span style={{ color: 'var(--primary)' }}>Guard</span>
           </span>
         </div>
-        <button onClick={onReset}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface)', color: 'var(--fg2)', border: '1.5px solid var(--border)', borderRadius: 10, padding: '7px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--fg2)'; }}
-        >
-          <Icon name="refresh" size={14} color="currentColor" /> 새 분석
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={onShare}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface)', color: 'var(--fg2)', border: '1.5px solid var(--border)', borderRadius: 10, padding: '7px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--fg2)'; }}
+          >
+            <Icon name="link" size={14} color="currentColor" /> 공유
+          </button>
+          <button onClick={onReset}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface)', color: 'var(--fg2)', border: '1.5px solid var(--border)', borderRadius: 10, padding: '7px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--fg2)'; }}
+          >
+            <Icon name="refresh" size={14} color="currentColor" /> 새 분석
+          </button>
+        </div>
       </header>
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '8px 24px 48px', position: 'relative', zIndex: 10, animation: 'fadeIn 0.5s ease' }}>
