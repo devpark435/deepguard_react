@@ -20,7 +20,16 @@ from utils.image_loader import load_image_as_base64, ImageLoadError, Unsupported
 
 app = FastAPI(title="DeepGuard AI 판독기 API")
 
-_reports: dict[str, dict] = {}
+_KV_URL = os.environ.get("KV_REST_API_URL")
+_KV_TOKEN = os.environ.get("KV_REST_API_TOKEN")
+
+if _KV_URL and _KV_TOKEN:
+    from upstash_redis import Redis as UpstashRedis
+    _redis = UpstashRedis(url=_KV_URL, token=_KV_TOKEN)
+else:
+    _redis = None
+
+_reports: dict[str, dict] = {}  # local fallback
 
 app.add_middleware(
     CORSMiddleware,
@@ -162,19 +171,30 @@ async def search_origin_endpoint(req: SearchOriginRequest):
 
 @app.post("/api/share")
 def create_share(req: ShareRequest):
+    import json
     report_id = str(uuid_lib.uuid4())[:8]
-    _reports[report_id] = {
+    data = {
         "result": req.result,
         "image_base64": req.image_base64,
         "mime_type": req.mime_type,
         "image_url": req.image_url,
         "created_at": datetime.utcnow().isoformat(),
     }
+    if _redis:
+        _redis.set(f"report:{report_id}", json.dumps(data), ex=60 * 60 * 24 * 7)  # 7일 TTL
+    else:
+        _reports[report_id] = data
     return {"id": report_id}
 
 
 @app.get("/api/report/{report_id}")
 def get_report(report_id: str):
+    import json
+    if _redis:
+        raw = _redis.get(f"report:{report_id}")
+        if not raw:
+            raise HTTPException(status_code=404, detail="리포트를 찾을 수 없습니다.")
+        return json.loads(raw)
     report = _reports.get(report_id)
     if not report:
         raise HTTPException(status_code=404, detail="리포트를 찾을 수 없습니다.")

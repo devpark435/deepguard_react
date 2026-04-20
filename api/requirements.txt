@@ -4,3 +4,7 @@ openai
 python-dotenv
 python-multipart
 pydantic
+upstash-redis
+Pillow
+requests
+rich
