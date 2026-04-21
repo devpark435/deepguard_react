@@ -127,6 +127,7 @@ detected 기준:
 **12. style_inconsistency**
 detected 기준:
 - 이미지의 일부 영역만 다른 화풍이나 해상도를 가짐
+- 얼굴(강한 보정, 도자기 피부)과 몸/옷/배경(거칠고 잔노이즈가 있는 현실적 질감) 간의 명확한 질감/해상도 차이 (매우 중요: 전형적인 딥페이크 합성 후 AI 복원 특징)
 - 인물은 사실적인데 배경은 회화적(또는 그 반대)
 - 특정 물체만 지나치게 디테일하고 나머지는 단순
 - 조각 또는 inpainting 흔적 (경계선에서 스타일이 급변)
@@ -140,7 +141,7 @@ detected 기준:
 - **Stable Diffusion / SDXL**: hand_anomaly, background_distortion(halo 효과), text_distortion 집중
 - **DALL-E 3**: over_smoothing, style_inconsistency, lighting_inconsistency(균일 조명) 집중
 - **GAN (StyleGAN)**: eye_anomaly(반사광 비대칭), face_asymmetry, background_distortion 집중
-- **딥페이크**: face_asymmetry(경계), lighting_inconsistency(얼굴-배경), skin_texture(경계부) 집중
+- **딥페이크 / 페이스스왑**: style_inconsistency(얼굴부위만 AI보정, 몸은 실사), face_asymmetry(합성 경계선), lighting_inconsistency(얼굴-배경 불일치) 집중
 
 ---
 
