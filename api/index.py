@@ -64,10 +64,19 @@ def _build_response(analysis: dict) -> dict:
     clues = [{"type": "warning", "text": e} for e in analysis.get("key_evidences", [])]
     evidence = analysis.get("counter_evidences", [])
 
-    verdict = (
-        f"{score}%의 확률로 AI 생성 {'가능성이 높다고' if score >= 70 else '가능성이 있다고' if score >= 40 else '가능성이 낮다고'} 판단됩니다. "
-        f"{model} 모델의 특징을 반영한 분석 결과입니다."
-    )
+    is_deepfake = bool(analysis.get("is_deepfake", False))
+
+    if is_deepfake:
+        verdict = (
+            f"{score}%의 확률로 딥페이크(얼굴 합성 및 후처리) {'가능성이 높다고' if score >= 70 else '가능성이 있다고' if score >= 40 else '가능성이 낮다고'} 판단됩니다. "
+            f"얼굴 영역의 강한 보정 흔적 등 딥페이크 특유의 후처리 특징을 반영한 결과입니다."
+        )
+    else:
+        verdict = (
+            f"{score}%의 확률로 순수 AI 생성 {'가능성이 높다고' if score >= 70 else '가능성이 있다고' if score >= 40 else '가능성이 낮다고'} 판단됩니다. "
+            f"{model} 모델의 특징을 반영한 분석 결과입니다."
+        )
+
     if analysis.get("uncertainty_notes"):
         verdict += f" {analysis['uncertainty_notes']}"
 
@@ -75,7 +84,7 @@ def _build_response(analysis: dict) -> dict:
         "score": score,
         "model": model,
         "modelDesc": MODEL_DESC.get(model, MODEL_DESC["unknown"]),
-        "isDeepfake": bool(analysis.get("is_deepfake", False)),
+        "isDeepfake": is_deepfake,
         "clues": clues,
         "evidence": evidence,
         "verdict": verdict,
