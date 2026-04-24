@@ -157,125 +157,13 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
 
                 {ragResult && (
                   <div style={{ animation: 'fadeIn 0.4s ease' }}>
-                    {ragResult.identifying_features && (
-                      <p style={{ fontSize: 12, color: 'var(--fg2)', lineHeight: 1.65, marginBottom: 14, padding: '10px 12px', background: 'var(--bg)', borderRadius: 10 }}>
-                        {ragResult.identifying_features}
-                      </p>
-                    )}
-
-                    {/* Vision API 역검색 결과 — 원본 예상 비교 */}
-                    {ragResult.web_detection && (() => {
-                      const wd = ragResult.web_detection;
-                      const matches = [...(wd.full_matches || []), ...(wd.partial_matches || [])];
-                      const pages = wd.pages || [];
-                      const bestMatch = matches[0] || null;
-                      const matchLabel = bestMatch && (wd.full_matches?.length > 0) ? '완전 일치' : '부분 일치';
-
-                      return (
-                        <div style={{ marginBottom: 14 }}>
-                          {/* 원본 예상 이미지 비교 */}
-                          {bestMatch ? (
-                            <div style={{ marginBottom: 12 }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                                원본 예상 이미지
-                              </div>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }}>
-                                {/* 분석된 이미지 */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                  <img src={imagePreview} alt="분석 이미지"
-                                    style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 10, border: '2px solid var(--danger)' }} />
-                                  <div style={{ textAlign: 'center' }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--danger)', background: 'var(--danger-soft)', padding: '2px 8px', borderRadius: 99 }}>딥페이크 의심</span>
-                                  </div>
-                                </div>
-                                {/* 화살표 */}
-                                <div style={{ fontSize: 16, color: 'var(--fg3)', flexShrink: 0 }}>→</div>
-                                {/* 원본 예상 */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                  <a href={bestMatch.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>
-                                    <img src={bestMatch.url} alt="원본 예상"
-                                      style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 10, border: '2px solid var(--success)' }}
-                                      onError={e => { e.target.style.display = 'none'; }} />
-                                  </a>
-                                  <div style={{ textAlign: 'center' }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--success)', background: 'var(--success-soft)', padding: '2px 8px', borderRadius: 99 }}>{matchLabel}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              {/* 나머지 매칭 이미지 */}
-                              {matches.length > 1 && (
-                                <div style={{ display: 'flex', gap: 6, marginTop: 8, overflowX: 'auto', paddingBottom: 2 }}>
-                                  {matches.slice(1, 5).map((m, i) => (
-                                    <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
-                                      <img src={m.url} alt=""
-                                        style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 8, border: '1.5px solid var(--border)' }}
-                                        onError={e => { e.target.parentElement.style.display = 'none'; }} />
-                                    </a>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <p style={{ fontSize: 11, color: 'var(--fg3)', padding: '8px 0', marginBottom: 8 }}>웹에서 동일/유사 이미지를 찾지 못했습니다.</p>
-                          )}
-
-                          {/* Google 인식 엔티티 */}
-                          {wd.entities?.length > 0 && (
-                            <div style={{ marginBottom: 10 }}>
-                              <div style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, marginBottom: 6 }}>Google 인식 정보</div>
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                                {wd.entities.slice(0, 6).map((e, i) => (
-                                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: 'var(--fg)', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 99, padding: '3px 10px' }}>
-                                    {e.description}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* 이미지 포함 페이지 */}
-                          {pages.length > 0 && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 }}>
-                              <div style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, marginBottom: 2 }}>이미지 포함 페이지</div>
-                              {pages.slice(0, 3).map((p, i) => (
-                                <a key={i} href={p.url} target="_blank" rel="noopener noreferrer"
-                                  style={{ fontSize: 11, color: 'var(--primary)', padding: '6px 10px', background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--border)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', transition: 'border-color 0.15s' }}
-                                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                                >
-                                  {p.title || p.url}
-                                </a>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-
-                    {/* 검색 링크 */}
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-                      추가 검색
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {ragResult.search_links?.map((link, i) => (
-                        <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '11px 14px', background: 'var(--bg)', borderRadius: 12, border: '1px solid var(--border)', textDecoration: 'none', transition: 'border-color 0.15s' }}
-                          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
-                          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
-                        >
-                          <div>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--fg)', marginBottom: 2 }}>{link.engine}</div>
-                            <div style={{ fontSize: 11, color: 'var(--fg3)' }}>{link.description}</div>
-                          </div>
-                          <Icon name="link" size={14} color="var(--primary)" />
-                        </a>
-                      ))}
-                    </div>
-                    {ragResult.search_strategy && (
-                      <p style={{ fontSize: 11, color: 'var(--fg3)', lineHeight: 1.6, marginTop: 12 }}>
-                        {ragResult.search_strategy}
-                      </p>
-                    )}
+                    <p style={{ fontSize: 12, color: 'var(--fg2)', lineHeight: 1.6 }}>
+                      {ragResult.web_detection
+                        ? ([...(ragResult.web_detection.full_matches || []), ...(ragResult.web_detection.partial_matches || [])].length > 0
+                            ? '웹에서 유사 이미지를 발견했습니다. 아래 비교 섹션을 확인하세요.'
+                            : '웹에서 동일/유사 이미지를 찾지 못했습니다.')
+                        : '식별 특징을 추출했습니다. 아래 링크로 직접 탐색해보세요.'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -373,6 +261,106 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
             </div>
           </div>
         </div>
+
+        {/* 원본 이미지 비교 — 풀 와이드 섹션 */}
+        {ragResult?.web_detection && (() => {
+          const wd = ragResult.web_detection;
+          const matches = [...(wd.full_matches || []), ...(wd.partial_matches || [])];
+          if (matches.length === 0) return null;
+          const fullCount = wd.full_matches?.length || 0;
+
+          return (
+            <div style={{ marginTop: 24, background: 'var(--surface)', borderRadius: 20, border: '1px solid var(--border)', overflow: 'hidden', animation: 'fadeIn 0.5s ease' }}>
+              <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Icon name="search" size={16} color="var(--primary)" />
+                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--fg)' }}>원본 이미지 비교</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, background: 'var(--primary-soft)', color: 'var(--primary)', padding: '2px 8px', borderRadius: 99 }}>
+                    {matches.length}건 발견
+                  </span>
+                </div>
+                {ragResult.search_strategy && (
+                  <p style={{ fontSize: 11, color: 'var(--fg3)', maxWidth: 500, textAlign: 'right', lineHeight: 1.5 }}>
+                    {ragResult.search_strategy}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ padding: '28px' }}>
+                {/* 메인 비교 */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr', gap: 0, alignItems: 'center', marginBottom: 24 }}>
+                  {/* 딥페이크 이미지 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', border: '2.5px solid var(--danger)', boxShadow: '0 0 0 4px var(--danger-soft)' }}>
+                      <img src={imagePreview} alt="분석 이미지"
+                        style={{ width: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }} />
+                      <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--danger)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 99 }}>
+                        딥페이크 의심
+                      </div>
+                    </div>
+                    <p style={{ fontSize: 12, color: 'var(--fg2)', lineHeight: 1.6, padding: '0 4px' }}>
+                      {ragResult.identifying_features}
+                    </p>
+                  </div>
+
+                  {/* 중앙 화살표 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontSize: 28, color: 'var(--border)' }}>→</div>
+                    <span style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>원본 추정</span>
+                  </div>
+
+                  {/* 원본 예상 이미지 */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <a href={matches[0].url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative', borderRadius: 16, overflow: 'hidden', border: '2.5px solid var(--success)', boxShadow: '0 0 0 4px var(--success-soft)', textDecoration: 'none' }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                    >
+                      <img src={matches[0].url} alt="원본 예상"
+                        style={{ width: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }}
+                        onError={e => { e.target.src = ''; e.target.style.minHeight = '200px'; e.target.style.background = 'var(--bg)'; }} />
+                      <div style={{ position: 'absolute', top: 12, left: 12, background: 'var(--success)', color: 'white', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 99 }}>
+                        {fullCount > 0 ? '완전 일치' : '부분 일치'}
+                      </div>
+                      <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.55)', color: 'white', fontSize: 10, fontWeight: 600, padding: '4px 10px', borderRadius: 99, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Icon name="link" size={10} color="white" /> 원본 열기
+                      </div>
+                    </a>
+                    <p style={{ fontSize: 12, color: 'var(--fg2)', lineHeight: 1.6, padding: '0 4px' }}>
+                      {ragResult.background_body_description || '웹에서 발견된 유사 이미지입니다. 클릭하면 원본 페이지로 이동합니다.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 추가 매칭 이미지 */}
+                {matches.length > 1 && (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
+                      추가 유사 이미지
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+                      {matches.slice(1).map((m, i) => (
+                        <a key={i} href={m.url} target="_blank" rel="noopener noreferrer"
+                          style={{ flexShrink: 0, position: 'relative', borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)', display: 'block', transition: 'border-color 0.15s' }}
+                          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                        >
+                          <img src={m.url} alt=""
+                            style={{ width: 120, height: 120, objectFit: 'cover', display: 'block' }}
+                            onError={e => { e.target.parentElement.style.display = 'none'; }} />
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.5)', padding: '4px 6px' }}>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: 'white' }}>
+                              {i < fullCount - 1 ? '완전 일치' : '부분 일치'}
+                            </span>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         <p style={{ fontSize: 11, color: 'var(--fg3)', textAlign: 'center', marginTop: 32, lineHeight: 1.6 }}>
           본 분석은 AI 보조 도구의 결과이며, 100% 정확성을 보장하지 않습니다. 최종 판단은 사용자 본인이 내려 주세요.
