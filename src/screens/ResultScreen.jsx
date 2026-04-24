@@ -219,6 +219,20 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
                             <p style={{ fontSize: 11, color: 'var(--fg3)', padding: '8px 0', marginBottom: 8 }}>웹에서 동일/유사 이미지를 찾지 못했습니다.</p>
                           )}
 
+                          {/* Google 인식 엔티티 */}
+                          {wd.entities?.length > 0 && (
+                            <div style={{ marginBottom: 10 }}>
+                              <div style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, marginBottom: 6 }}>Google 인식 정보</div>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                                {wd.entities.slice(0, 6).map((e, i) => (
+                                  <span key={i} style={{ fontSize: 11, fontWeight: 600, color: 'var(--fg)', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 99, padding: '3px 10px' }}>
+                                    {e.description}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {/* 이미지 포함 페이지 */}
                           {pages.length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 }}>
