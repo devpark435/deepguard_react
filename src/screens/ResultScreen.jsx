@@ -162,6 +162,64 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
                         {ragResult.identifying_features}
                       </p>
                     )}
+
+                    {/* Vision API 역검색 결과 */}
+                    {ragResult.web_detection && (() => {
+                      const wd = ragResult.web_detection;
+                      const matches = [...(wd.full_matches || []), ...(wd.partial_matches || [])];
+                      const pages = wd.pages || [];
+                      const hasResults = matches.length > 0 || pages.length > 0;
+                      return (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                            이미지 역검색 결과
+                          </div>
+                          {!hasResults && (
+                            <p style={{ fontSize: 11, color: 'var(--fg3)', padding: '8px 0' }}>웹에서 동일/유사 이미지를 찾지 못했습니다.</p>
+                          )}
+                          {matches.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+                              {matches.slice(0, 5).map((m, i) => (
+                                <a key={i} href={m.url} target="_blank" rel="noopener noreferrer"
+                                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg)', borderRadius: 10, border: '1px solid var(--border)', textDecoration: 'none', transition: 'border-color 0.15s' }}
+                                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                                >
+                                  <img src={m.url} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6, flexShrink: 0, background: 'var(--border)' }}
+                                    onError={e => { e.target.style.display = 'none'; }} />
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 11, color: 'var(--fg)', fontWeight: 600, marginBottom: 1 }}>
+                                      {i < (wd.full_matches?.length || 0) ? '완전 일치' : '부분 일치'}
+                                    </div>
+                                    <div style={{ fontSize: 10, color: 'var(--fg3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.url}</div>
+                                  </div>
+                                  <Icon name="link" size={12} color="var(--primary)" />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          {pages.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                              <div style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, marginBottom: 2 }}>이미지 포함 페이지</div>
+                              {pages.slice(0, 3).map((p, i) => (
+                                <a key={i} href={p.url} target="_blank" rel="noopener noreferrer"
+                                  style={{ fontSize: 11, color: 'var(--primary)', padding: '6px 10px', background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--border)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', transition: 'border-color 0.15s' }}
+                                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+                                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                                >
+                                  {p.title || p.url}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* 검색 링크 */}
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                      추가 검색
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {ragResult.search_links?.map((link, i) => (
                         <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"

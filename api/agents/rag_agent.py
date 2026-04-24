@@ -3,6 +3,7 @@ from urllib.parse import quote_plus
 
 from prompts.rag_prompt import RAG_VISION_SYSTEM_PROMPT
 from utils.openai_client import vision_completion
+from utils.web_detection import web_detect
 
 
 def _make_search_links(
@@ -75,9 +76,13 @@ def search_origin(
     score: int,
     model: str,
 ) -> dict:
-    """GPT-4o Vision으로 식별 특징을 추출하고 원본 탐색 링크를 생성한다."""
+    """이미지 자체 역검색(Vision API) + GPT-4o 특징 추출 + 검색 링크를 반환한다."""
     is_deepfake = "FaceSwap" in model or "HeyGen" in model
 
+    # 1. Google Cloud Vision API로 이미지 자체 역검색
+    web_results = web_detect(image_base64) if image_base64 else None
+
+    # 2. GPT-4o로 식별 특징 및 키워드 추출
     if is_deepfake:
         context_msg = (
             f"이 이미지는 딥페이크(얼굴 합성) 이미지로 판정되었습니다 (AI 생성 확률 {score}%, 추정 모델: {model}). "
@@ -121,4 +126,6 @@ def search_origin(
         "keywords": keywords,
         "search_links": search_links,
         "search_strategy": vision_data.get("search_strategy", ""),
+        # Vision API 역검색 결과 (없으면 None)
+        "web_detection": web_results,
     }
