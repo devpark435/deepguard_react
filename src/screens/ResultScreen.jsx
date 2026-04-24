@@ -4,7 +4,7 @@ import Icon from '../components/Icon';
 import GaugeChart from '../components/GaugeChart';
 import ProgressBar from '../components/ProgressBar';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 export default function ResultScreen({ imagePreview, imageBase64, imageMimeType, imageUrl, result, ragEnabled, onReset, onShare }) {
   const [activeTab, setActiveTab] = useState('clues');

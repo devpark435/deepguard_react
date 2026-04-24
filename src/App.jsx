@@ -4,7 +4,7 @@ import HomeScreen from './screens/HomeScreen';
 import AnalyzingScreen from './screens/AnalyzingScreen';
 import ResultScreen from './screens/ResultScreen';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 const ANALYZE_STEPS = [
   '이미지 전처리 중...',
