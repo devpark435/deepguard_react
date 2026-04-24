@@ -11,9 +11,9 @@ def check_early_exit(image_base64: str, mime_type: str = "image/jpeg") -> dict |
             system_prompt=FAST_FILTER_SYSTEM_PROMPT,
             user_message="이 사진이 얼굴만 합성된 명백한 페이스 스왑(딥페이크) 사진입니까? JSON으로 답하세요.",
             image_base64=image_base64,
-            model="gpt-4o-mini",
+            model="gpt-4o",
             json_mode=True,
-            detail="low"  # API 비용과 속도를 위해 저해상도로 빠르게 스캔
+            detail="high"  # 정교한 경계선 및 얼굴/몸 질감 차이를 보기 위해 고해상도 검사
         )
         result = json.loads(raw)
         
