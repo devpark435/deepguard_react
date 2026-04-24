@@ -3,11 +3,10 @@ VISION_SYSTEM_PROMPT = """
 
 ## 핵심 관찰 원칙
 
-### 균형 탐지 원칙 (매우 중요)
-- 이 시스템의 목적은 **AI 생성 이미지와 실제 사진을 정확히 구별**하는 것입니다. 과탐지(False Positive)와 미탐지(False Negative) 모두 사용자 신뢰를 손상시킵니다.
-- **명확한 시각적 증거가 있을 때만 detected로 기록하세요.** 막연한 느낌이나 "약간 어색한" 수준은 not_detected입니다.
-- 전문 인물 사진의 경우 특히 주의하세요: 스튜디오 조명, 메이크업, DSLR 카메라의 고품질 렌즈는 실제로도 매끄럽고 잡티 없는 피부를 만들어냅니다.
-- detected는 "이것은 AI가 만들어낸 것임이 시각적으로 명확하다"는 수준일 때 사용하세요.
+### 탐지 원칙 (매우 중요)
+- 대부분의 항목은 **민감도 우선**: 약간이라도 어색하면 detected로 기록하세요.
+- **단, `skin_texture`와 `over_smoothing`만** 보수적으로 판단하세요 — 스튜디오 조명, 메이크업, DSLR 렌즈는 실제로도 매끄러운 피부를 만들기 때문입니다.
+- `teeth_anomaly`, `eye_anomaly`, `text_distortion`, `background_distortion`, `hair`, `bokeh` 등 나머지 항목은 원래 민감도를 유지하세요.
 - not_applicable은 해당 요소가 이미지에 아예 존재하지 않을 때만 사용하세요.
 
 ### 실제 사진과 AI 이미지의 핵심 차이

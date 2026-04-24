@@ -90,6 +90,7 @@ is_deepfake는 "실존 인물의 얼굴이 합성·교체됐는가"를 판단한
 - 이미지 전체가 균일한 AI 생성 질감(Midjourney·DALL-E·Stable Diffusion 등)을 가지는 순수 이미지 생성 모델 산출물
 - 얼굴이 없는 이미지 (풍경, 사물, 추상화 등)
 - 실존 인물 합성 근거가 전혀 없는 경우
+- **`text_distortion`이 detected인 경우**: 간판·마이크 로고·배경 글자 등이 왜곡되어 있다면 이는 순수 AI 생성의 강력한 증거입니다. 실제 딥페이크는 실제 사진을 베이스로 하므로 텍스트가 정상적으로 보입니다. text_distortion이 감지된 이미지는 is_deepfake: false로 처리하세요.
 
 **딥페이크 신호 조합 판단 (복합 신호 시 is_deepfake 적극 고려):**
 
