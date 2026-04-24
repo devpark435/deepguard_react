@@ -304,9 +304,8 @@ export default function ResultScreen({ imagePreview, imageBase64, imageMimeType,
                   </div>
 
                   {/* 중앙 화살표 */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <div style={{ fontSize: 28, color: 'var(--border)' }}>→</div>
-                    <span style={{ fontSize: 10, color: 'var(--fg3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>원본 추정</span>
                   </div>
 
                   {/* 원본 예상 이미지 */}
