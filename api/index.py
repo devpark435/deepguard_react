@@ -16,6 +16,7 @@ load_dotenv()
 from agents.vision_agent import extract_features
 from agents.analysis_agent import analyze
 from agents.rag_agent import search_origin
+from agents.fast_filter_agent import check_early_exit
 from utils.image_loader import load_image_as_base64, ImageLoadError, UnsupportedFormatError
 
 app = FastAPI(title="DeepGuard AI 판독기 API")
@@ -115,8 +116,12 @@ async def analyze_file(file: UploadFile = File(...)):
     }
 
     try:
-        vision = extract_features(img["base64"], img["mime_type"], exif=img["exif"])
-        analysis = analyze(vision, ensemble=True)
+        # 1차 고속 필터 구동
+        analysis = check_early_exit(img["base64"], img["mime_type"])
+        
+        if not analysis:
+            vision = extract_features(img["base64"], img["mime_type"], exif=img["exif"])
+            analysis = analyze(vision, ensemble=True)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
 
@@ -153,8 +158,12 @@ async def analyze_url(req: UrlRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     try:
-        vision = extract_features(img["base64"], img["mime_type"], exif=img["exif"])
-        analysis = analyze(vision, ensemble=True)
+        # 1차 고속 필터 구동
+        analysis = check_early_exit(img["base64"], img["mime_type"])
+        
+        if not analysis:
+            vision = extract_features(img["base64"], img["mime_type"], exif=img["exif"])
+            analysis = analyze(vision, ensemble=True)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"분석 중 오류가 발생했습니다: {str(e)}")
 
